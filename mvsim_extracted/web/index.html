@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MVSim Web — Multi-Vehicle Robotics & Sensor Simulator</title>
+  <meta name="description" content="High-fidelity interactive 2D robotics simulator extracted from MRPT/mvsim. Real-time differential and Ackermann vehicle dynamics, 2D LiDAR raycasting, IMU, and APF obstacle avoidance.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-badge">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 3v18"/>
+          <path d="M3 12h18"/>
+          <circle cx="12" cy="12" r="3" fill="currentColor"/>
+        </svg>
+        <span class="logo-text">MVSIM</span>
+        <span class="logo-tag">WEB SIMULATOR</span>
+      </div>
+      <div class="status-indicator">
+        <span class="pulse-dot"></span>
+        <span id="sim-status-label">SIMULATING (60 FPS)</span>
+      </div>
+    </div>
+
+    <!-- World Presets Selector -->
+    <div class="header-center">
+      <div class="preset-group">
+        <span class="group-label">PRESET:</span>
+        <button id="btn-preset-college" class="btn-preset active" data-preset="college">College Campus</button>
+        <button id="btn-preset-warehouse" class="btn-preset" data-preset="warehouse">Warehouse AGV</button>
+        <button id="btn-preset-multirobot" class="btn-preset" data-preset="multirobot">Multi-Robot</button>
+        <button id="btn-preset-ackermann" class="btn-preset" data-preset="ackermann">Ackermann Car</button>
+        <button id="btn-preset-maze" class="btn-preset" data-preset="maze">Obstacle Arena</button>
+      </div>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="header-right">
+      <!-- 3D / 2D View Switcher -->
+      <div class="view-mode-toggle">
+        <button id="btn-view-3d" class="btn-toggle active" title="3D WebGL Simulation">3D View</button>
+        <button id="btn-view-2d" class="btn-toggle" title="2D Tactical View">2D Tactical</button>
+      </div>
+
+      <button id="btn-xml-modal" class="btn-action secondary" title="Import or Export MVSim XML World">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        XML World
+      </button>
+      <button id="btn-reset-sim" class="btn-action secondary" title="Reset Simulation State">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Reset
+      </button>
+      <button id="btn-pause-toggle" class="btn-action primary" title="Pause or Resume Simulation">
+        <svg class="btn-icon icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        <span id="btn-pause-text">Pause</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-layout">
+    <!-- Left Sidebar: Controls & Robot Parameters -->
+    <aside class="sidebar-left">
+      <!-- Robot Selector Card -->
+      <section class="panel-card">
+        <div class="card-header">
+          <h2 class="card-title">Active Vehicle</h2>
+          <span id="badge-veh-class" class="badge">Differential</span>
+        </div>
+        <div class="card-body">
+          <div class="vehicle-tabs" id="vehicle-tabs-container">
+            <!-- Dynamic Robot Buttons -->
+          </div>
+
+          <div class="mode-toggle-group">
+            <button id="btn-mode-teleop" class="mode-btn active" data-mode="teleop">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Manual WASD
+            </button>
+            <button id="btn-mode-apf" class="mode-btn" data-mode="apf">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+              SLAM & A* Auto Nav
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- LiDAR Configuration Card -->
+      <section class="panel-card">
+        <div class="card-header">
+          <h2 class="card-title">2D LiDAR Sensor (LaserScanner)</h2>
+          <span class="badge info">Active</span>
+        </div>
+        <div class="card-body">
+          <div class="slider-control">
+            <div class="slider-label">
+              <span>Aperture / FOV</span>
+              <span id="val-lidar-fov" class="slider-val">270°</span>
+            </div>
+            <input type="range" id="slider-lidar-fov" min="90" max="360" step="10" value="270">
+          </div>
+
+          <div class="slider-control">
+            <div class="slider-label">
+              <span>Ray Count</span>
+              <span id="val-lidar-rays" class="slider-val">181 rays</span>
+            </div>
+            <input type="range" id="slider-lidar-rays" min="61" max="361" step="30" value="181">
+          </div>
+
+          <div class="slider-control">
+            <div class="slider-label">
+              <span>Max Range</span>
+              <span id="val-lidar-range" class="slider-val">14.0 m</span>
+            </div>
+            <input type="range" id="slider-lidar-range" min="4" max="25" step="1" value="14">
+          </div>
+
+          <div class="toggle-row">
+            <label class="switch-label" for="chk-lidar-noise">Gaussian Range Noise (σ=0.015m)</label>
+            <input type="checkbox" id="chk-lidar-noise" checked>
+          </div>
+          <div class="toggle-row">
+            <label class="switch-label" for="chk-lidar-rays">Render Laser Beams</label>
+            <input type="checkbox" id="chk-lidar-rays" checked>
+          </div>
+        </div>
+      </section>
+
+      <!-- Simulation Engine Tuning -->
+      <section class="panel-card">
+        <div class="card-header">
+          <h2 class="card-title">Kinematics & Speed Limits</h2>
+        </div>
+        <div class="card-body">
+          <div class="slider-control">
+            <div class="slider-label">
+              <span>Max Speed (v_max)</span>
+              <span id="val-speed-limit" class="slider-val">1.6 m/s</span>
+            </div>
+            <input type="range" id="slider-speed-limit" min="0.5" max="3.5" step="0.1" value="1.6">
+          </div>
+
+          <div class="slider-control">
+            <div class="slider-label">
+              <span>Max Yaw Rate (w_max)</span>
+              <span id="val-yaw-limit" class="slider-val">2.2 rad/s</span>
+            </div>
+            <input type="range" id="slider-yaw-limit" min="0.5" max="4.0" step="0.1" value="2.2">
+          </div>
+
+          <div class="slider-control">
+            <div class="slider-label">
+              <span>Simulation Speed</span>
+              <span id="val-sim-speed" class="slider-val">1.0x</span>
+            </div>
+            <input type="range" id="slider-sim-speed" min="0.25" max="2.5" step="0.25" value="1.0">
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive World Tools -->
+      <section class="panel-card">
+        <div class="card-header">
+          <h2 class="card-title">Scene Interaction</h2>
+        </div>
+        <div class="card-body">
+          <div class="action-btn-grid">
+            <button id="btn-spawn-box" class="btn-tool">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+              Add Obstacle Box
+            </button>
+            <button id="btn-random-goal" class="btn-tool">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m12 8-4 4 4 4"/><path d="M16 12H8"/></svg>
+              New Target Goal
+            </button>
+          </div>
+          <p class="hint-text">💡 Tip: Click &amp; drag any obstacle on the canvas to dynamically block the robot in real time!</p>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Center Canvas Viewport -->
+    <div class="canvas-viewport">
+      <canvas id="sim-canvas"></canvas>
+
+      <!-- Floating Controls / Mini HUD on Canvas -->
+      <div class="canvas-overlay top-left">
+        <div class="hud-stat-pill highlight-target">
+          <span class="pill-label">CAMPUS TARGET</span>
+          <span id="hud-target-name" class="pill-val">1. Central Library (1/7)</span>
+        </div>
+        <div class="hud-stat-pill">
+          <span class="pill-label">ROBOT POSE</span>
+          <span id="hud-pose" class="pill-val">X: 0.00m | Y: 0.00m | θ: 0.0°</span>
+        </div>
+        <div class="hud-stat-pill">
+          <span class="pill-label">TWIST</span>
+          <span id="hud-twist" class="pill-val">V: 0.00 m/s | W: 0.00 rad/s</span>
+        </div>
+      </div>
+
+      <div class="canvas-overlay top-right">
+        <div class="hud-stat-pill">
+          <span class="pill-label">LIDAR DETECTIONS</span>
+          <span id="hud-lidar-hits" class="pill-val">181/181 (Min: 0.00m)</span>
+        </div>
+        <button id="btn-center-cam" class="btn-canvas-action" title="Center camera on vehicle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+          Track Robot
+        </button>
+      </div>
+
+      <!-- 3D Camera Controls overlay -->
+      <div class="canvas-overlay bottom-left cam-controls-bar" id="cam-controls-3d">
+        <span class="cam-label">3D CAM:</span>
+        <button id="cam-btn-follow" class="cam-btn active" data-cam="follow">Follow Robot</button>
+        <button id="cam-btn-fpv" class="cam-btn" data-cam="fpv">Robot FPV</button>
+        <button id="cam-btn-orbit" class="cam-btn" data-cam="orbit">Orbit</button>
+        <button id="cam-btn-topdown" class="cam-btn" data-cam="topdown">Top-Down</button>
+      </div>
+
+      <!-- Canvas Bottom Keys Hint & Joystick -->
+      <div class="canvas-overlay bottom-center">
+        <div class="keyboard-legend">
+          <div class="key-pill"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>Drive</span></div>
+          <div class="key-pill"><kbd>Space</kbd><span>Brake</span></div>
+          <div class="key-pill"><kbd>P</kbd><span>Toggle Auto Nav</span></div>
+          <div class="key-pill"><kbd>N</kbd><span>Next Target</span></div>
+          <div class="key-pill"><kbd>Click Canvas</kbd><span>Set/Add Target</span></div>
+        </div>
+      </div>
+
+      <!-- Touch / Virtual Joystick on bottom right -->
+      <div class="virtual-joystick-container" id="joystick-zone">
+        <div class="joystick-base">
+          <div class="joystick-stick" id="joystick-stick"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar: Live Telemetry, Polar Radar & IMU Instruments -->
+    <aside class="sidebar-right">
+      <!-- Polar LiDAR Radar Scope -->
+      <section class="panel-card">
+        <div class="card-header">
+          <h2 class="card-title">LiDAR 360° Polar Scope</h2>
+          <span class="badge success">LIVE</span>
+        </div>
+        <div class="card-body radar-card-body">
+          <div class="radar-container">
+            <canvas id="radar-canvas" width="220" height="220"></canvas>
+            <div class="radar-scanline"></div>
+          </div>
+          <div class="radar-stats">
+            <div class="stat-box">
+              <span class="stat-num" id="stat-min-dist">0.00m</span>
+              <span class="stat-label">Min Obstacle Dist</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num" id="stat-free-sector">Forward</span>
+              <span class="stat-label">Clear Sector</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- IMU Gauges & Accelerations -->
+      <section class="panel-card">
+        <div class="card-header">
+          <h2 class="card-title">IMU Telemetry (Inertial Unit)</h2>
+        </div>
+        <div class="card-body">
+          <div class="imu-grid">
+            <div class="gauge-box">
+              <div class="gauge-label">ACCEL X (Forward)</div>
+              <div class="meter-bar-container">
+                <div class="meter-bar-fill" id="meter-ax" style="width: 50%;"></div>
+              </div>
+              <div class="gauge-value" id="val-ax">+0.00 m/s²</div>
+            </div>
+
+            <div class="gauge-box">
+              <div class="gauge-label">ACCEL Y (Lateral)</div>
+              <div class="meter-bar-container">
+                <div class="meter-bar-fill" id="meter-ay" style="width: 50%;"></div>
+              </div>
+              <div class="gauge-value" id="val-ay">+0.00 m/s²</div>
+            </div>
+
+            <div class="gauge-box">
+              <div class="gauge-label">GYRO YAW RATE (ωz)</div>
+              <div class="meter-bar-container">
+                <div class="meter-bar-fill" id="meter-wz" style="width: 50%;"></div>
+              </div>
+              <div class="gauge-value" id="val-wz">+0.00 rad/s</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Odometry Drift vs Ground Truth -->
+      <section class="panel-card">
+        <div class="card-header">
+          <h2 class="card-title">Odometry Drift Monitor</h2>
+          <span class="badge warning">Noisy Encoder</span>
+        </div>
+        <div class="card-body">
+          <div class="drift-readouts">
+            <div class="drift-row">
+              <span class="d-label">Ground Truth Position:</span>
+              <span class="d-val" id="drift-gt">X: 0.00m, Y: 0.00m</span>
+            </div>
+            <div class="drift-row">
+              <span class="d-label">Wheel Odometry Dead-reckon:</span>
+              <span class="d-val" id="drift-odom">X: 0.00m, Y: 0.00m</span>
+            </div>
+            <div class="drift-row highlight">
+              <span class="d-label">Cumulative Drift Error:</span>
+              <span class="d-val text-alert" id="drift-error">Δ 0.00 m</span>
+            </div>
+          </div>
+
+          <div class="wheel-speeds-box">
+            <div class="wheel-stat">
+              <span class="w-label">Left Wheel RPM</span>
+              <span class="w-val" id="wheel-left-rpm">0.0</span>
+            </div>
+            <div class="wheel-stat">
+              <span class="w-label">Right Wheel RPM</span>
+              <span class="w-val" id="wheel-right-rpm">0.0</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- APF Vector Forces -->
+      <section class="panel-card" id="apf-inspector-panel">
+        <div class="card-header">
+          <h2 class="card-title">APF Vector Forces</h2>
+        </div>
+        <div class="card-body">
+          <div class="force-legend">
+            <div class="legend-item"><span class="dot green"></span><span>Attractive Target Force</span></div>
+            <div class="legend-item"><span class="dot red"></span><span>LiDAR Repulsive Forces</span></div>
+            <div class="legend-item"><span class="dot yellow"></span><span>Resultant Steering Vector</span></div>
+          </div>
+          <div class="force-readout">
+            <div class="stat-box">
+              <span class="stat-num" id="stat-f-attr">0.00 N</span>
+              <span class="stat-label">Goal Pull</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num" id="stat-f-rep">0.00 N</span>
+              <span class="stat-label">Obstacle Push</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <!-- MVSim XML World Import/Export Modal -->
+  <div class="modal-backdrop" id="xml-modal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <svg class="modal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <h3 class="modal-title">MVSim XML World Definition (.world.xml)</h3>
+        </div>
+        <button id="btn-close-modal" class="btn-close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-description">
+          This XML conforms directly to <strong>MRPT / MVSim</strong> XML world schema (compatible with <code>demo_warehouse.world.xml</code> and <code>mvsim launch</code>). You can edit, paste custom XML, or copy the active scene.
+        </p>
+        <textarea id="xml-editor-textarea" spellcheck="false"></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btn-copy-xml" class="btn-action secondary">Copy XML</button>
+        <button id="btn-load-custom-xml" class="btn-action primary">Load into Simulation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three.js 3D WebGL Engine & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="simulator3d.js"></script>
+  <script src="simulator.js"></script>
+</body>
+</html>

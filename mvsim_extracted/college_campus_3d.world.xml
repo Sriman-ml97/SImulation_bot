@@ -1,0 +1,323 @@
+<mvsim_world version="1.0" xmlns:block="http://mrpt.org/mvsim/block" xmlns:vehicle="http://mrpt.org/mvsim/vehicle">
+	<!--
+	  3D College Campus Environment for MVSim
+	  Utilizing 3D models from mvsim_model:
+	  - Robot: TurtleBot3 Burger (mvsim_model/turtlebot3/burger_base.dae)
+	  - Campus Departments: Library, Admin, CS Dept, Cafeteria, Auditorium, Workshop, Main Gate
+	  - 3D Props: Bookshelves, Tool Carts, Dining Tables, Piano, Police Station, Radio Tower,
+	              Palm Trees, Stop Signs, Traffic Cones, Crates, Pallets, Rocks
+	-->
+
+	<!-- General simulation options -->
+	<simul_timestep>0.02</simul_timestep>
+	<joystick_enabled>true</joystick_enabled>
+
+	<!-- GUI 3D options -->
+	<gui>
+		<ortho>false</ortho>
+		<show_forces>false</show_forces>
+		<cam_distance>32</cam_distance>
+		<cam_azimuth>-65</cam_azimuth>
+		<cam_elevation>45</cam_elevation>
+		<cam_point_to>0 0 0</cam_point_to>
+		<fov_deg>60</fov_deg>
+		<refresh_fps>40</refresh_fps>
+		<follow_vehicle>campus_bot</follow_vehicle>
+	</gui>
+
+	<!-- Lighting: Sun & shadow parameters -->
+	<lights>
+		<enable_shadows>true</enable_shadows>
+		<light_azimuth_deg>-70.0</light_azimuth_deg>
+		<light_elevation_deg>45.0</light_elevation_deg>
+		<light_ambient>0.40</light_ambient>
+		<ambient_ground_color>#708090</ambient_ground_color>
+
+		<!-- Campus Courtyard Streetlights -->
+		<point_light>
+			<position>0.0 4.0 4.5</position>
+			<color>#fff2cc</color>
+			<linear_attenuation>0.04</linear_attenuation>
+		</point_light>
+		<point_light>
+			<position>0.0 -4.0 4.5</position>
+			<color>#fff2cc</color>
+			<linear_attenuation>0.04</linear_attenuation>
+		</point_light>
+	</lights>
+
+	<!-- Ground: College Campus Asphalt & Courtyard Lawns -->
+	<element class="horizontal_plane">
+		<x_min>-18.0</x_min> <y_min>-14.0</y_min>
+		<x_max>18.0</x_max> <y_max>14.0</y_max>
+		<z>0.0</z>
+		<color>#2b303c</color>
+	</element>
+
+	<!-- Central Walkway Pavers (Courtyard Corridor) -->
+	<element class="horizontal_plane">
+		<x_min>-4.0</x_min> <y_min>-12.0</y_min>
+		<x_max>4.0</x_max> <y_max>12.0</y_max>
+		<z>0.005</z>
+		<color>#4a5568</color>
+	</element>
+
+	<!-- East-West Academic Promenade -->
+	<element class="horizontal_plane">
+		<x_min>-16.0</x_min> <y_min>-2.0</y_min>
+		<x_max>16.0</x_max> <y_max>2.0</y_max>
+		<z>0.005</z>
+		<color>#4a5568</color>
+	</element>
+
+	<!-- Central Quad Lawn (Greenery) -->
+	<element class="horizontal_plane">
+		<x_min>-3.5</x_min> <y_min>-3.5</y_min>
+		<x_max>3.5</x_max> <y_max>3.5</y_max>
+		<z>0.01</z>
+		<color>#2d5a3c</color>
+	</element>
+
+	<!-- ==============================================
+	     3D Model Block Classes (from mvsim_model)
+	     ============================================== -->
+	<block:class name="bookshelf">
+		<visual>
+			<model_uri>../mvsim_model/wooden_bookshelf_worn/wooden_bookshelf_worn.gltf</model_uri>
+			<model_scale>1.0</model_scale>
+		</visual>
+	</block:class>
+
+	<block:class name="tool_cart">
+		<visual>
+			<model_uri>../mvsim_model/tool_cart/tool_cart.gltf</model_uri>
+			<model_scale>1.0</model_scale>
+		</visual>
+	</block:class>
+
+	<block:class name="dining_table">
+		<visual>
+			<model_uri>../mvsim_model/dining_table/dining_table.gltf</model_uri>
+			<model_scale>1.0</model_scale>
+		</visual>
+	</block:class>
+
+	<block:class name="police_station">
+		<visual>
+			<model_uri>../mvsim_model/PoliceStation/police_station.dae</model_uri>
+			<model_scale>0.001</model_scale>
+			<model_roll>90.0</model_roll>
+		</visual>
+	</block:class>
+
+	<block:class name="radio_tower">
+		<visual>
+			<model_uri>../mvsim_model/RadioTower/radio_tower.dae</model_uri>
+			<model_scale>0.001</model_scale>
+			<model_roll>90.0</model_roll>
+		</visual>
+	</block:class>
+
+	<block:class name="piano">
+		<visual>
+			<model_uri>../mvsim_model/Piano/piano.dae</model_uri>
+			<model_scale>0.001</model_scale>
+			<model_roll>90.0</model_roll>
+		</visual>
+	</block:class>
+
+	<block:class name="palm_tree">
+		<visual>
+			<model_uri>../mvsim_model/TropicPalmTree/free_palm.dae</model_uri>
+			<model_scale>0.015</model_scale>
+			<model_roll>90.0</model_roll>
+		</visual>
+	</block:class>
+
+	<block:class name="stop_sign">
+		<visual>
+			<model_uri>../mvsim_model/StopSign/stop_sign.dae</model_uri>
+			<model_scale>0.001</model_scale>
+			<model_roll>90.0</model_roll>
+		</visual>
+	</block:class>
+
+	<block:class name="construction_cone">
+		<visual>
+			<model_uri>../mvsim_model/ConstructionCone/construction_cone.dae</model_uri>
+			<model_scale>0.001</model_scale>
+			<model_roll>90.0</model_roll>
+		</visual>
+	</block:class>
+
+	<block:class name="pallet">
+		<visual>
+			<model_uri>../mvsim_model/pallet/pallet.dae</model_uri>
+			<model_scale>1.0</model_scale>
+			<model_roll>90.0</model_roll>
+		</visual>
+	</block:class>
+
+	<block:class name="cardboard_box">
+		<visual>
+			<model_uri>../mvsim_model/cardboard_box_01/cardboard_box_01.gltf</model_uri>
+			<model_scale>1.0</model_scale>
+		</visual>
+	</block:class>
+
+	<!-- ==============================================
+	     Campus Department Buildings & Architecture
+	     ============================================== -->
+	<!-- 1. Main Administration Block -->
+	<block class="default" name="bld_admin">
+		<init_pose>0.0 8.0 0.0</init_pose>
+		<size_x>8.0</size_x> <size_y>3.2</size_y> <size_z>5.5</size_z>
+		<color>#a54b4b</color>
+	</block>
+
+	<!-- 2. Central Library & Learning Hub -->
+	<block class="default" name="bld_library">
+		<init_pose>-9.5 5.0 0.0</init_pose>
+		<size_x>6.0</size_x> <size_y>4.5</size_y> <size_z>6.2</size_z>
+		<color>#466eaf</color>
+	</block>
+
+	<!-- 3. Computer Science & AI Tech Park -->
+	<block class="default" name="bld_cs_dept">
+		<init_pose>9.5 5.0 0.0</init_pose>
+		<size_x>6.0</size_x> <size_y>4.5</size_y> <size_z>7.0</size_z>
+		<color>#2d8c91</color>
+	</block>
+
+	<!-- 4. Mechanical Workshop & Robotics Fab Lab -->
+	<block class="default" name="bld_workshop">
+		<init_pose>-9.5 -5.0 0.0</init_pose>
+		<size_x>6.5</size_x> <size_y>4.0</size_y> <size_z>5.0</size_z>
+		<color>#a07332</color>
+	</block>
+
+	<!-- 5. Campus Cafeteria & Student Center -->
+	<block class="default" name="bld_cafeteria">
+		<init_pose>9.5 -5.0 0.0</init_pose>
+		<size_x>6.0</size_x> <size_y>4.0</size_y> <size_z>4.2</size_z>
+		<color>#be692d</color>
+	</block>
+
+	<!-- 6. Grand Auditorium & Convention Center -->
+	<block class="default" name="bld_auditorium">
+		<init_pose>0.0 -8.0 0.0</init_pose>
+		<size_x>8.0</size_x> <size_y>3.4</size_y> <size_z>6.8</size_z>
+		<color>#7d4191</color>
+	</block>
+
+	<!-- 7. Central Quad Monument & Fountain -->
+	<block class="default" name="monument_fountain">
+		<init_pose>0.0 0.0 0.0</init_pose>
+		<size_x>2.6</size_x> <size_y>2.6</size_y> <size_z>1.6</size_z>
+		<color>#3c9664</color>
+	</block>
+
+	<!-- ==============================================
+	     3D Model Props Placed Across Campus
+	     ============================================== -->
+	<!-- Library Bookshelves & Reading Furniture -->
+	<block class="bookshelf" name="lib_shelf_1">
+		<init_pose>-7.0 2.2 0.0</init_pose>
+	</block>
+	<block class="bookshelf" name="lib_shelf_2">
+		<init_pose>-12.0 2.2 0.0</init_pose>
+	</block>
+
+	<!-- Workshop Tool Carts & Cargo Pallets -->
+	<block class="tool_cart" name="ws_toolcart_1">
+		<init_pose>-7.0 -2.5 0.0</init_pose>
+	</block>
+	<block class="pallet" name="ws_pallet_1">
+		<init_pose>-12.0 -2.5 0.0</init_pose>
+	</block>
+	<block class="cardboard_box" name="ws_box_1">
+		<init_pose>-12.0 -2.5 0.2</init_pose>
+	</block>
+
+	<!-- Cafeteria Dining Tables -->
+	<block class="dining_table" name="cafe_table_1">
+		<init_pose>7.0 -2.5 0.0</init_pose>
+	</block>
+	<block class="dining_table" name="cafe_table_2">
+		<init_pose>12.0 -2.5 0.0</init_pose>
+	</block>
+
+	<!-- Auditorium Stage Concert Piano -->
+	<block class="piano" name="stage_piano">
+		<init_pose>0.0 -5.8 0.0</init_pose>
+	</block>
+
+	<!-- Campus Main Gate Security Depot & Radio Tower -->
+	<block class="police_station" name="gate_security_post">
+		<init_pose>3.5 -11.5 0.0</init_pose>
+	</block>
+	<block class="radio_tower" name="comm_radio_tower">
+		<init_pose>-3.5 -11.5 0.0</init_pose>
+	</block>
+	<block class="stop_sign" name="gate_stop_sign">
+		<init_pose>1.5 -9.5 0.0</init_pose>
+	</block>
+	<block class="construction_cone" name="gate_cone_1">
+		<init_pose>-1.2 -9.5 0.0</init_pose>
+	</block>
+	<block class="construction_cone" name="gate_cone_2">
+		<init_pose>-1.2 -10.5 0.0</init_pose>
+	</block>
+
+	<!-- Campus Boulevard Palm Trees -->
+	<block class="palm_tree" name="palm_1"> <init_pose>-5.0 5.5 0.0</init_pose> </block>
+	<block class="palm_tree" name="palm_2"> <init_pose>5.0 5.5 0.0</init_pose> </block>
+	<block class="palm_tree" name="palm_3"> <init_pose>-5.0 -5.5 0.0</init_pose> </block>
+	<block class="palm_tree" name="palm_4"> <init_pose>5.0 -5.5 0.0</init_pose> </block>
+
+	<!-- ==============================================
+	     Robot: TurtleBot3 Burger (from mvsim_model)
+	     ============================================== -->
+	<vehicle name="campus_bot" class="differential">
+		<init_pose>0.0 -11.0 90.0</init_pose> <!-- Starts at Campus Main Gate facing North -->
+
+		<!-- TurtleBot3 Burger 3D Visual Mesh -->
+		<visual>
+			<model_uri>../mvsim_model/turtlebot3/burger_base.dae</model_uri>
+			<model_roll>90.0</model_roll>
+			<model_scale>0.001</model_scale>
+			<model_color>#252830</model_color>
+		</visual>
+
+		<!-- TurtleBot3 2D LiDAR Scanner -->
+		<sensor class="laser" name="laser1">
+			<pose>0.0 0.0 0.17 0.0</pose>
+			<fov_degrees>270</fov_degrees>
+			<n_rays>181</n_rays>
+			<range_std_noise>0.015</range_std_noise>
+			<max_range>14.0</max_range>
+			<visual>
+				<model_uri>../mvsim_model/turtlebot3/lds.dae</model_uri>
+				<model_roll>90.0</model_roll>
+				<model_scale>0.001</model_scale>
+			</visual>
+		</sensor>
+
+		<!-- IMU sensor -->
+		<sensor class="imu" name="imu1">
+			<pose>0.0 0.0 0.05 0.0</pose>
+		</sensor>
+	</vehicle>
+
+	<!-- ==============================================
+	     College Campus Mission Targets
+	     ============================================== -->
+	<target name="1. Central Library" x="-9.5" y="1.2" description="Deliver research journals &amp; academic archives" dwell_time="2.0" />
+	<target name="2. Admin Building" x="0.0" y="5.0" description="Dean's Office mail &amp; registrar dispatch" dwell_time="2.0" />
+	<target name="3. Computer Science Dept" x="9.5" y="1.2" description="AI &amp; Robotics Lab hardware kit delivery" dwell_time="2.0" />
+	<target name="4. Campus Cafeteria" x="9.5" y="-1.8" description="Faculty meal &amp; refreshment station" dwell_time="2.0" />
+	<target name="5. Grand Auditorium" x="0.0" y="-5.0" description="Seminar schedules &amp; conference AV drop" dwell_time="2.0" />
+	<target name="6. Mechanical Workshop" x="-9.5" y="-1.8" description="3D print prototypes &amp; tooling transfer" dwell_time="2.0" />
+	<target name="7. Campus Main Gate" x="0.0" y="-11.0" description="Return to campus security depot &amp; recharge" dwell_time="2.5" />
+
+</mvsim_world>

@@ -1,0 +1,38 @@
+[project]
+name = "simulation-bot"
+version = "0.1.0"
+description = "Lightweight Multi-Vehicle Robotics, Sensors & Autonomous Navigation Simulation Engine"
+readme = "mvsim_extracted/README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Robotics Simulation Team" }
+]
+dependencies = [
+    "numpy>=2.0.0",
+    "opencv-python>=4.10.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[project.scripts]
+mvsim = "mvsim_extracted.run_simulation:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mvsim_extracted"]
+
+[tool.pytest.ini_options]
+testpaths = ["mvsim_extracted/tests"]
+python_files = ["test_*.py"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+]
+
